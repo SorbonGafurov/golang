@@ -1,38 +1,28 @@
 package main
 
 import (
+	"IbtService/internal/config"
 	"IbtService/internal/delivery/httpdelivery"
+	"IbtService/internal/delivery/httpdelivery/middleware"
+	"IbtService/internal/httpclient"
+	"IbtService/internal/logger"
 	"IbtService/internal/service"
-	"fmt"
-	"net/http"
-	"net/url"
-	"os"
-	"time"
+	"log/slog"
 
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
-	_ = godotenv.Load("../../.env")
-	// Настройки прокси
-	proxyUsername := os.Getenv("PROXY_USERNAME")
-	proxyPassword := os.Getenv("PROXY_PASSWORD")
-	proxyHost := os.Getenv("PROXY_HOST")
+	cfg := config.Load()
+	logger := logger.NewLogger(cfg.LogFile)
+	slog.SetDefault(logger)
 
-	proxyURL, _ := url.Parse(fmt.Sprintf("http://%s:%s@%s", proxyUsername, proxyPassword, proxyHost))
-	transport := &http.Transport{Proxy: http.ProxyURL(proxyURL)}
+	client := httpclient.NewProxyClient(cfg)
+	svc := service.NewExternalService(client)
 
-	client := &http.Client{
-		Transport: transport,
-		Timeout:   30 * time.Second,
-	}
+	r := gin.New()
+	r.Use(middleware.Logger())
 
-	// Инициализируем сервис
-	service := service.NewExternalService(client)
-
-	// Запускаем сервер
-	r := gin.Default()
-	r.POST("/test", httpdelivery.TestHandler(service))
+	r.POST("/test", httpdelivery.TestHandler(svc))
 	r.Run(":8080")
 }
