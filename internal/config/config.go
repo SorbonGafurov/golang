@@ -1,6 +1,7 @@
 package config
 
 import (
+	"log"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -14,11 +15,14 @@ type Config struct {
 }
 
 func Load() *Config {
-	_ = godotenv.Load("../../.env")
+	err := godotenv.Load("../../.env")
+	if err != nil {
+		log.Fatal("Файл .env не найден прочитайте README.md")
+	}
 	return &Config{
 		ProxyUsername: os.Getenv("PROXY_USERNAME"),
 		ProxyPassword: os.Getenv("PROXY_PASSWORD"),
 		ProxyHost:     os.Getenv("PROXY_HOST"),
-		LogFile:       "app.log",
+		LogFile:       os.Getenv("LOG_FILE"),
 	}
 }
