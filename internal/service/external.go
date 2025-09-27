@@ -1,7 +1,7 @@
 package service
 
 import (
-	"IbtService/internal/domain"
+	"IbtService/internal/delivery/httpdelivery/dto"
 	"bytes"
 	"encoding/xml"
 	"fmt"
@@ -10,7 +10,7 @@ import (
 )
 
 type ExternalService interface {
-	Send(req *domain.Request) (*domain.Response, error)
+	Send(req *dto.Request) (*dto.Response, error)
 }
 
 type externalService struct {
@@ -21,7 +21,7 @@ func NewExternalService(client *http.Client) ExternalService {
 	return &externalService{client: client}
 }
 
-func (s *externalService) Send(reqData *domain.Request) (*domain.Response, error) {
+func (s *externalService) Send(reqData *dto.Request) (*dto.Response, error) {
 	xmlBytes, err := xml.MarshalIndent(reqData, "", "  ")
 	if err != nil {
 		return nil, fmt.Errorf("marshal xml error: %w", err)
@@ -47,7 +47,7 @@ func (s *externalService) Send(reqData *domain.Request) (*domain.Response, error
 		return nil, fmt.Errorf("read body error: %w", err)
 	}
 
-	xmlResp := &domain.Response{}
+	xmlResp := &dto.Response{}
 	if err := xml.Unmarshal(body, xmlResp); err != nil {
 		return nil, fmt.Errorf("unmarshal xml error: %w", err)
 	}

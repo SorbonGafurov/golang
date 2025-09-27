@@ -1,7 +1,7 @@
 package httpdelivery
 
 import (
-	"IbtService/internal/domain"
+	"IbtService/internal/delivery/httpdelivery/dto"
 	"IbtService/internal/service"
 	"log/slog"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 func TestHandler(s service.ExternalService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		slog.Debug("test")
-		reqData := &domain.Request{}
+		reqData := &dto.Request{}
 
 		if err := c.ShouldBindJSON(reqData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
