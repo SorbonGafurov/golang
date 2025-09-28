@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func serve(svc service.ExternalService, cfg *config.Config) {
+func serve(svc service.ExternalService, cfg *config.Config) error {
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      route(svc),
@@ -17,5 +17,5 @@ func serve(svc service.ExternalService, cfg *config.Config) {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	server.ListenAndServe()
+	return server.ListenAndServe()
 }

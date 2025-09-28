@@ -5,6 +5,7 @@ import (
 	"IbtService/internal/httpclient"
 	"IbtService/internal/logger"
 	"IbtService/internal/service"
+	"log"
 	"log/slog"
 )
 
@@ -15,5 +16,8 @@ func main() {
 
 	client := httpclient.NewProxyClient(cfg)
 	svc := service.NewExternalService(client)
-	serve(svc, cfg)
+	err := serve(svc, cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
