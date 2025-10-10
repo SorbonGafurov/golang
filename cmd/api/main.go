@@ -6,18 +6,40 @@ import (
 	"IbtService/internal/logger"
 	"IbtService/internal/service"
 	"log"
-	"log/slog"
 )
 
-func main() {
-	cfg := config.Load()
-	logger := logger.NewLogger(cfg.LogFile)
-	slog.SetDefault(logger)
+type application struct {
+	service service.ExternalService
+	cfg     *config.Config
+	log     *logger.AppLogger
+	rabb    *service.Rabbit
+}
 
-	client := httpclient.NewProxyClient(cfg)
-	svc := service.NewExternalService(client)
-	err := serve(svc, cfg)
+func main() {
+	//конфигурация
+	cfgLoad := config.Load()
+
+	//RabbitMq
+	r, err := service.ConnRabbit(cfgLoad)
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer r.Close()
+
+	//httClient
+	client := httpclient.NewProxyClient(cfgLoad)
+
+	app := &application{
+		service: service.NewExternalService(client, cfgLoad),
+		cfg:     cfgLoad,
+		log:     logger.NewLogger(),
+		rabb:    r,
+	}
+
+	err = app.serve()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }

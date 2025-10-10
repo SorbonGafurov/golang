@@ -1,21 +1,20 @@
 package main
 
 import (
-	"IbtService/internal/delivery/httpdelivery"
-	"IbtService/internal/delivery/httpdelivery/middleware"
-	"IbtService/internal/service"
+	"IbtService/internal/middlware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-func route(svc service.ExternalService) http.Handler {
+func (app *application) routes() http.Handler {
 	r := gin.New()
-	r.Use(middleware.Logger())
+
+	r.Use(middlware.RequestLogger(app.log))
 
 	v1 := r.Group("/api")
 	{
-		v1.POST("/test", httpdelivery.TestHandler(svc))
+		v1.POST("/test", app.TestHandler)
 	}
 
 	return r
