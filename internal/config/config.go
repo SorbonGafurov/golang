@@ -14,6 +14,7 @@ type Config struct {
 	ProxyHost     string
 	LogFile       string
 	Port          int
+	UrlRrebqin    string
 }
 
 func Load() *Config {
@@ -34,5 +35,6 @@ func Load() *Config {
 		ProxyHost:     os.Getenv("PROXY_HOST"),
 		LogFile:       os.Getenv("LOG_FILE"),
 		Port:          port,
+		UrlRrebqin:    os.Getenv("URL_REQBIN"),
 	}
 }
