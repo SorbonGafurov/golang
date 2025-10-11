@@ -3,6 +3,7 @@ package main
 import (
 	"IbtService/internal/config"
 	"IbtService/internal/httpclient"
+	"IbtService/internal/logger"
 	"IbtService/internal/service"
 	"log"
 )
@@ -10,6 +11,7 @@ import (
 type application struct {
 	service service.ExternalService
 	cfg     *config.Config
+	log     *logger.AppLogger
 }
 
 func main() {
@@ -23,6 +25,7 @@ func main() {
 	app := application{
 		service: service.NewExternalService(client, cfgLoad),
 		cfg:     cfgLoad,
+		log:     logger.NewLogger(),
 	}
 
 	err := app.serve()

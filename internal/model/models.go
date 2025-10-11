@@ -2,8 +2,8 @@ package model
 
 // ===== DOMAIN =====
 type Request struct {
-	Login    string `json:"login" xml:"Login"`
-	Password string `json:"password" xml:"Password"`
+	Login    string `json:"login" xml:"Login" binding:"required"`
+	Password string `json:"password" xml:"Password" binding:"required"`
 }
 
 type Response struct {

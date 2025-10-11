@@ -1,6 +1,7 @@
 package main
 
 import (
+	"IbtService/internal/middlware"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,8 @@ import (
 
 func (app *application) routes() http.Handler {
 	r := gin.New()
+
+	r.Use(middlware.RequestLogger(app.log))
 
 	v1 := r.Group("/api")
 	{
