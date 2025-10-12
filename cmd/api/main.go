@@ -22,7 +22,7 @@ func main() {
 	//httClient
 	client := httpclient.NewProxyClient(cfgLoad)
 
-	app := application{
+	app := &application{
 		service: service.NewExternalService(client, cfgLoad),
 		cfg:     cfgLoad,
 		log:     logger.NewLogger(),
