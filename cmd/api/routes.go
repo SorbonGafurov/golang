@@ -15,7 +15,6 @@ func (app *application) routes() http.Handler {
 	v1 := r.Group("/api")
 	{
 		v1.POST("/test", app.TestHandler)
-		v1.POST("/test_2", app.TestHandler_2)
 	}
 
 	return r
