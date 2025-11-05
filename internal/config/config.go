@@ -15,6 +15,10 @@ type Config struct {
 	LogFile       string
 	Port          int
 	UrlRrebqin    string
+<<<<<<< HEAD
+=======
+	UrlRabbit     string
+>>>>>>> test
 }
 
 func Load() *Config {
@@ -36,5 +40,9 @@ func Load() *Config {
 		LogFile:       os.Getenv("LOG_FILE"),
 		Port:          port,
 		UrlRrebqin:    os.Getenv("URL_REQBIN"),
+<<<<<<< HEAD
+=======
+		UrlRabbit:     os.Getenv("URL_RABBIT"),
+>>>>>>> test
 	}
 }
