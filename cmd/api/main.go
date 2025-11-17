@@ -16,6 +16,8 @@ type application struct {
 }
 
 func main() {
+	service.OutBoxMessage()
+
 	//конфигурация
 	cfgLoad := config.Load()
 
