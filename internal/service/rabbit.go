@@ -3,6 +3,7 @@ package service
 import (
 	"IbtService/internal/config"
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -10,9 +11,11 @@ import (
 )
 
 type Rabbit struct {
-	conn    *amqp.Connection
-	returns chan amqp.Return
-	done    chan struct{}
+	conn     *amqp.Connection
+	ch       *amqp.Channel
+	returnCh chan amqp.Return
+	confirms chan amqp.Confirmation
+	close    chan *amqp.Error
 }
 
 func ConnRabbit(cfg *config.Config) (*Rabbit, error) {
@@ -21,27 +24,44 @@ func ConnRabbit(cfg *config.Config) (*Rabbit, error) {
 		return nil, err
 	}
 
-	r := &Rabbit{
-		conn:    conn,
-		returns: make(chan amqp.Return),
-		done:    make(chan struct{}),
+	ch, err := conn.Channel()
+	if err != nil {
+		_ = conn.Close()
+		return nil, fmt.Errorf("ошибка открытия канала: %w", err)
 	}
 
-	// Постоянный слушатель возвратов
-	go func() {
-		for {
-			select {
-			case ret, ok := <-r.returns:
-				if !ok {
-					log.Println("return channel closed — stopping listener")
-					return
-				}
-				log.Printf("❌ Returned: %s (key=%s body=%s)", ret.ReplyText, ret.RoutingKey, string(ret.Body))
+	r := &Rabbit{
+		conn:     conn,
+		ch:       ch,
+		returnCh: make(chan amqp.Return, 10),
+		confirms: make(chan amqp.Confirmation, 10),
+		close:    make(chan *amqp.Error),
+	}
 
-			case <-r.done:
-				log.Println("return listener stopped by shutdown")
-				return
+	err = r.ch.Confirm(false)
+	if err != nil {
+		return nil, err
+	}
+
+	go func() {
+		for c := range r.ch.NotifyPublish(r.confirms) {
+			if !c.Ack {
+				log.Println("Nacked")
 			}
+		}
+	}()
+
+	go func() {
+		for err := range r.ch.NotifyClose(r.close) {
+			if err != nil {
+				log.Println("Close")
+			}
+		}
+	}()
+
+	go func() {
+		for range r.ch.NotifyReturn(r.returnCh) {
+			log.Println("Return")
 		}
 	}()
 
@@ -49,38 +69,11 @@ func ConnRabbit(cfg *config.Config) (*Rabbit, error) {
 }
 
 func (r *Rabbit) PublishToRabbit(data []byte) (bool, error) {
-	ch, err := r.conn.Channel()
-	if err != nil {
-		return false, err
-	}
-	defer ch.Close()
-
-	/*confirms := make(chan amqp.Confirmation)
-	ch.NotifyPublish(confirms)
-	err = ch.Confirm(false)
-	failOnError(err, "Failed to confirm")*/
-
-	//returns := make(chan amqp.Return)
-	ch.NotifyReturn(r.returns)
-
-	err = ch.ExchangeDeclare(
-		"transfers", // name
-		"direct",    // type
-		true,        // durable
-		false,       // auto-deleted
-		false,       // internal
-		false,       // no-wait
-		nil,         // arguments
-	)
-	if err != nil {
-		return false, err
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err = ch.PublishWithContext(ctx,
-		"transfers",   // exchange
+	err := r.ch.PublishWithContext(ctx,
+		"transfer",    // exchange
 		"transferKey", // routing key
 		true,          // mandatory
 		false,         // immediate
@@ -93,15 +86,13 @@ func (r *Rabbit) PublishToRabbit(data []byte) (bool, error) {
 		return false, err
 	}
 
-	select {
-	case <-returns:
-		return false, nil
-	case <-time.After(2 * time.Second):
-		return true, nil
-	}
+	return true, nil
 }
 
 func (r *Rabbit) Close() {
+	if r.ch != nil {
+		_ = r.ch.Close()
+	}
 	if r.conn != nil {
 		_ = r.conn.Close()
 	}
