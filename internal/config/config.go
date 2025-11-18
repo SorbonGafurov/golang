@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	ProxyUsername string
-	ProxyPassword string
-	ProxyHost     string
-	LogFile       string
-	Port          int
-	UrlRrebqin    string
-	UrlRabbit     string
+	ProxyUsername    string
+	ProxyPassword    string
+	ProxyHost        string
+	LogFile          string
+	Port             int
+	UrlRrebqin       string
+	UrlRabbit        string
+	PostreSqlConnStr string
 }
 
 func Load() *Config {
@@ -31,12 +32,13 @@ func Load() *Config {
 	}
 
 	return &Config{
-		ProxyUsername: os.Getenv("PROXY_USERNAME"),
-		ProxyPassword: os.Getenv("PROXY_PASSWORD"),
-		ProxyHost:     os.Getenv("PROXY_HOST"),
-		LogFile:       os.Getenv("LOG_FILE"),
-		Port:          port,
-		UrlRrebqin:    os.Getenv("URL_REQBIN"),
-		UrlRabbit:     os.Getenv("URL_RABBIT"),
+		ProxyUsername:    os.Getenv("PROXY_USERNAME"),
+		ProxyPassword:    os.Getenv("PROXY_PASSWORD"),
+		ProxyHost:        os.Getenv("PROXY_HOST"),
+		LogFile:          os.Getenv("LOG_FILE"),
+		Port:             port,
+		UrlRrebqin:       os.Getenv("URL_REQBIN"),
+		UrlRabbit:        os.Getenv("URL_RABBIT"),
+		PostreSqlConnStr: os.Getenv("PostreSqlConnStr"),
 	}
 }
