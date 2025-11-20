@@ -13,10 +13,10 @@ type application struct {
 	cfg     *config.Config
 	log     *logger.AppLogger
 	rabb    *service.Rabbit
+	ob      *service.OutBox
 }
 
 func main() {
-	service.OutBoxMessage()
 
 	//конфигурация
 	cfgLoad := config.Load()
@@ -28,23 +28,7 @@ func main() {
 	}
 	defer o.Close()
 
-	ch := make(chan string, 2)
-
-	// Две горутины, каждая вызывает метод
-	for i := 0; i < 2; i++ {
-		go func() {
-			om, err := o.SelectOutBox()
-			if err == nil {
-				ch <- om.Message
-			} else {
-				ch <- "пусто"
-			}
-		}()
-	}
-
-	println("1-" + <-ch)
-	println("2-" + <-ch)
-
+	o.InsertOutBox("test message")
 	//RabbitMq
 	/*r, err := service.ConnRabbit(cfgLoad)
 	if err != nil {
@@ -60,6 +44,7 @@ func main() {
 		cfg:     cfgLoad,
 		log:     logger.NewLogger(),
 		//rabb:    r,
+		ob: o,
 	}
 
 	err = app.serve()

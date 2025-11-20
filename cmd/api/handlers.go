@@ -4,6 +4,7 @@ import (
 	"IbtService/internal/model"
 	"encoding/xml"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -32,4 +33,11 @@ func (app *application) TestHandler(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, xmlResp)
+}
+
+func (app *application) insertOutBox(c *gin.Context) {
+	for i := 1; i <= 50; i++ {
+		app.ob.InsertOutBox(strconv.Itoa(i))
+	}
+	c.JSON(http.StatusOK, "OK")
 }

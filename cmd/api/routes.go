@@ -15,6 +15,7 @@ func (app *application) routes() http.Handler {
 	v1 := r.Group("/api")
 	{
 		v1.POST("/test", app.TestHandler)
+		v1.GET("/insertOutBox", app.insertOutBox)
 	}
 
 	return r

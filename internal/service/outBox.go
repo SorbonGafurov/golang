@@ -49,32 +49,3 @@ func (o *OutBox) InsertOutBox(message string) (int64, error) {
 
 	return rowCount, nil
 }
-
-func (o *OutBox) SelectOutBox() (*OutBoxMessage, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	om := &OutBoxMessage{}
-
-	query := `
-		UPDATE outboxmessages
-		SET status = 'processing'
-		WHERE id = (
-			SELECT id FROM outboxmessages
-			WHERE status = 'new'
-			LIMIT 1
-			FOR UPDATE SKIP LOCKED
-		)
-		RETURNING message;
-	`
-	err := o.db.QueryRowContext(ctx, query).Scan(&om.Message)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
-		}
-		return nil, err
-	}
-
-	return om, nil
-}
