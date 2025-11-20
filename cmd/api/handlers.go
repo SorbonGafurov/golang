@@ -33,3 +33,17 @@ func (app *application) TestHandler(c *gin.Context) {
 
 	c.JSON(http.StatusOK, xmlResp)
 }
+
+func (app *application) selectOutBoxCredit(c *gin.Context) {
+	obb, err := app.ob.SelectOutBox()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	if obb == nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "no new outbox messages"})
+		return
+	}
+	c.JSON(http.StatusOK, obb)
+}

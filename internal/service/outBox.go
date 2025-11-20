@@ -62,6 +62,7 @@ func (o *OutBox) SelectOutBox() (*OutBoxMessage, error) {
 		WHERE id = (
 			SELECT id FROM outboxmessages
 			WHERE status = 'new'
+			order by created desc
 			LIMIT 1
 			FOR UPDATE SKIP LOCKED
 		)
