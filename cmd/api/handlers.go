@@ -36,7 +36,7 @@ func (app *application) TestHandler(c *gin.Context) {
 }
 
 func (app *application) insertOutBox(c *gin.Context) {
-	for i := 1; i <= 50; i++ {
+	for i := 1; i <= 100000; i++ {
 		app.ob.InsertOutBox(strconv.Itoa(i))
 	}
 	c.JSON(http.StatusOK, "OK")

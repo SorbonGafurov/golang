@@ -28,7 +28,6 @@ func main() {
 	}
 	defer o.Close()
 
-	o.InsertOutBox("test message")
 	//RabbitMq
 	/*r, err := service.ConnRabbit(cfgLoad)
 	if err != nil {
